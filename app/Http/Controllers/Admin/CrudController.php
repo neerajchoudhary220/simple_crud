@@ -7,6 +7,7 @@ use App\Http\Requests\CrudFormRequest;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 
@@ -38,7 +39,7 @@ class CrudController extends Controller
             $recordsFiltered = $query->count();
             $i=1;
             foreach ($data as $d) {
-                $image=($d->image)? Storage::url($d->image):asset('assets/images/placeholder.webp');
+                $image=($d->image)? Storage::url($d->thumb_image):asset('assets/images/placeholder.webp');
                 $d->name="<div class=''><img src='$image' alt='userImg' width='25%' height='25%' class='mr-3' />$d->name</div>";
 
                 $d->index_column =$i;
@@ -68,7 +69,9 @@ class CrudController extends Controller
             DB::beginTransaction();
             $inputs = $request->only('name','email');
             if($request->hasFile('image')){
-                $inputs['image']= $request->file('image')->store('images');
+                // $inputs['image']= $request->file('image')->store('images');
+                [$inputs['image'], $inputs['thumb_image']] = createThumbnail($request->file('image'));
+
             }
             Student::create($inputs);
             DB::commit();
@@ -92,13 +95,14 @@ class CrudController extends Controller
             DB::beginTransaction();
             $inputs = $request->only('name','email');
             if($request->hasFile('image')){
-                $this->deleteImage($student);  // delete previous image if exists.
-                $inputs['image']= $request->file('image')->store('images');
+                deleteImage($student);
+                [$inputs['image'], $inputs['thumb_image']] = createThumbnail($request->file('image'));
             }
             $student->update($inputs);
             DB::commit();
             return redirect()->route('crud')->with('success','Entery updated successfully');
         } catch (\Exception $e) {
+            Log::error($e);
             DB::rollBack();
             return redirect()->back()->with('error',$e->getMessage());
         }
@@ -107,7 +111,7 @@ class CrudController extends Controller
     public function delete(Student $student) {
         try {
             DB::beginTransaction();
-            $this->deleteImage($student);
+            deleteImage($student);
             $student->delete();
             DB::commit();
             return redirect()->route('crud')->with('success','Entery deleted successfully');
@@ -123,10 +127,8 @@ class CrudController extends Controller
 
     }
 
-    public function deleteImage($model){
-        if($model->image){
-            Storage::delete($model->image);
-        }
-    }
+  
+
+   
 
 }
