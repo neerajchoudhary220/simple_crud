@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('test',function(){
+    return "Working";
+});
 
 Route::controller(CrudController::class)->prefix('crud')->group(function(){
     Route::get('/', 'index')->name('crud');
