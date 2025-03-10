@@ -122,5 +122,6 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+    'sport_api_base_url'=>env('SPORT_API_BASE_URL','https://api.b365api.com'),
 
 ];

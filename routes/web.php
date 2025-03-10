@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CrudController;
+use App\Http\Controllers\FoodController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,4 +18,8 @@ Route::controller(CrudController::class)->prefix('crud')->group(function(){
     Route::get('/delete/{student}', 'delete')->name('crud.delete');
     Route::get('/details/{student}', 'details')->name('crud.details');
    
+});
+
+Route::controller(FoodController::class)->prefix('food')->group(function(){
+    Route::get('/', 'index')->name('food');
 });
